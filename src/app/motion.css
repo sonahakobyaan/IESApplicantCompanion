@@ -1,17 +1,63 @@
-@media (prefers-reduced-motion: reduce){
-  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
-.scroll-progress{position:fixed;top:0;left:0;right:0;z-index:30;height:3px;transform-origin:0 50%;background:var(--orange);pointer-events:none}
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  height: 3px;
+  transform-origin: 0 50%;
+  background: var(--orange);
+  pointer-events: none;
+}
 
-::view-transition{pointer-events:none}
-::view-transition-group(root){animation-duration:280ms}
-::view-transition-old(root){animation:180ms ease-in both view-fade-out}
-::view-transition-new(root){animation:240ms ease-out 60ms both view-fade-in}
-::view-transition-group(site-header){z-index:100;animation:none}
-::view-transition-old(site-header),::view-transition-new(site-header){animation:none}
-@keyframes view-fade-out{to{opacity:0;transform:translateY(-8px)}}
-@keyframes view-fade-in{from{opacity:0;transform:translateY(8px)}}
-@media (prefers-reduced-motion: reduce){
-  ::view-transition-old(*),::view-transition-new(*),::view-transition-group(*){animation-duration:0s!important;animation-delay:0s!important}
+::view-transition {
+  pointer-events: none;
+}
+::view-transition-group(root) {
+  animation-duration: 280ms;
+}
+::view-transition-old(root) {
+  animation: 180ms ease-in both view-fade-out;
+}
+::view-transition-new(root) {
+  animation: 240ms ease-out 60ms both view-fade-in;
+}
+::view-transition-group(site-header) {
+  z-index: 100;
+  animation: none;
+}
+::view-transition-old(site-header),
+::view-transition-new(site-header) {
+  animation: none;
+}
+@keyframes view-fade-out {
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+@keyframes view-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
 }
