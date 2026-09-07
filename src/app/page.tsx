@@ -1,9 +1,17 @@
 "use client";
-/* eslint-disable react-hooks/set-state-in-effect, react-hooks/purity */
+/* eslint-disable react-hooks/set-state-in-effect */
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import {
+  AnimatePresence,
+  LayoutGroup,
+  MotionConfig,
+  motion,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+} from "framer-motion";
 import {
   ArrowRight,
   Bell,
@@ -33,6 +41,9 @@ import {
   eligibilityCriteria,
   faqItems,
   journeySteps,
+  programmeComponents,
+  scholarshipAmounts,
+  scholarshipCoverage,
   programme,
   type EligibilityAnswer,
   type View,
@@ -47,6 +58,11 @@ const navItems: { id: View; label: string }[] = [
   { id: "faq", label: "FAQ" },
   { id: "checklist", label: "Checklist" },
 ];
+const reveal = {
+  hidden: { opacity: 0, y: 22 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const } },
+};
+const stagger = { hidden: {}, visible: { transition: { staggerChildren: 0.08 } } };
 function useStored<T>(key: string, initial: T) {
   const [value, setValue] = useState<T>(initial);
   useEffect(() => {
@@ -93,17 +109,25 @@ function Button({
   type?: "button" | "submit";
 }) {
   return (
-    <button
+    <motion.button
       type={type}
       className={`button ${secondary ? "button-secondary" : ""} ${small ? "button-small" : ""}`}
       onClick={onClick}
+      whileTap={{ scale: 0.96 }}
+      transition={{ type: "spring", stiffness: 500, damping: 24 }}
     >
       {children}
-    </button>
+    </motion.button>
   );
 }
 
 function App() {
+  const { scrollYProgress } = useScroll();
+  const smoothScrollProgress = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001,
+  });
   const [view, setView] = useState<View>("home");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
@@ -118,9 +142,19 @@ function App() {
     false,
   );
   const go = (next: View) => {
-    setView(next);
-    setMobileOpen(false);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const updateView = () => {
+      setView(next);
+      setMobileOpen(false);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+    const browserWithTransitions = document as Document & {
+      startViewTransition?: (update: () => void) => unknown;
+    };
+    if (browserWithTransitions.startViewTransition) {
+      browserWithTransitions.startViewTransition(updateView);
+    } else {
+      updateView();
+    }
   };
   const checklistTotal = checklistCategories.reduce(
     (sum, group) => sum + group.items.length,
@@ -135,8 +169,18 @@ function App() {
     ),
   );
   return (
-    <div className="app-shell">
-      <header className="topbar">
+    <MotionConfig transition={{ duration: 0.32, ease: "easeOut" }} reducedMotion="user">
+      <LayoutGroup id="ies-companion">
+        <div className="app-shell">
+      <motion.div
+        className="scroll-progress"
+        style={{ scaleX: smoothScrollProgress }}
+        aria-hidden="true"
+      />
+      <header
+        className="topbar"
+        style={{ viewTransitionName: "site-header" } as React.CSSProperties}
+      >
         <div className="container nav-wrap">
           <button
             className="logo-button"
@@ -169,44 +213,52 @@ function App() {
         </div>
       </header>
       <main className="container main-content">
-        <AnimatePresence mode="wait">
-          {view === "home" && (
-            <Home
-              go={go}
-              readiness={readiness}
-              completed={completed.length}
-              total={checklistTotal}
-              eligibilityDone={eligibilityDone}
-            />
-          )}
-          {view === "programme" && <Programme go={go} />}
-          {view === "eligibility" && (
-            <Eligibility
-              answers={answers}
-              setAnswers={setAnswers}
-              step={eligibleStep}
-              setStep={setEligibleStep}
-              done={eligibilityDone}
-              setDone={setEligibilityDone}
-              go={go}
-            />
-          )}
-          {view === "journey" && (
-            <Journey
-              completed={completed}
-              setCompleted={setCompleted}
-              go={go}
-            />
-          )}
-          {view === "deadlines" && <Deadlines />}
-          {view === "faq" && <FAQ />}
-          {view === "checklist" && (
-            <Checklist
-              completed={completed}
-              setCompleted={setCompleted}
-              go={go}
-            />
-          )}
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={view}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -14 }}
+            transition={{ duration: 0.28, ease: "easeOut" }}
+          >
+            {view === "home" && (
+              <Home
+                go={go}
+                readiness={readiness}
+                completed={completed.length}
+                total={checklistTotal}
+                eligibilityDone={eligibilityDone}
+              />
+            )}
+            {view === "programme" && <Programme go={go} />}
+            {view === "eligibility" && (
+              <Eligibility
+                answers={answers}
+                setAnswers={setAnswers}
+                step={eligibleStep}
+                setStep={setEligibleStep}
+                done={eligibilityDone}
+                setDone={setEligibilityDone}
+                go={go}
+              />
+            )}
+            {view === "journey" && (
+              <Journey
+                completed={completed}
+                setCompleted={setCompleted}
+                go={go}
+              />
+            )}
+            {view === "deadlines" && <Deadlines />}
+            {view === "faq" && <FAQ />}
+            {view === "checklist" && (
+              <Checklist
+                completed={completed}
+                setCompleted={setCompleted}
+                go={go}
+              />
+            )}
+          </motion.div>
         </AnimatePresence>
       </main>
       <footer className="footer">
@@ -240,6 +292,7 @@ function App() {
       </footer>
       <button
         className="assistant-fab"
+        id="tour-assistant"
         onClick={() => setChatOpen(!chatOpen)}
         aria-label="Open IES Guide assistant"
       >
@@ -249,7 +302,9 @@ function App() {
       <AnimatePresence>
         {chatOpen && <Assistant go={go} close={() => setChatOpen(false)} />}
       </AnimatePresence>
-    </div>
+        </div>
+      </LayoutGroup>
+    </MotionConfig>
   );
 }
 function PageIntro({
@@ -261,11 +316,13 @@ function PageIntro({
   title: string;
   description: string;
 }) {
+  const reduceMotion = useReducedMotion();
   return (
     <motion.div
       className="page-intro"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
+      transition={reduceMotion ? { duration: 0.01 } : { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const }}
     >
       <span className="eyebrow">{eyebrow}</span>
       <h1>{title}</h1>
@@ -287,7 +344,7 @@ function Home({
   eligibilityDone: boolean;
 }) {
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+    <motion.div initial="hidden" animate="visible" variants={stagger}>
       <section className="hero">
         <div className="hero-copy">
           <span className="eyebrow">
@@ -330,9 +387,13 @@ function Home({
             ["03", "Prepare", "Build your application"],
             ["04", "Apply", "Take the next step"],
           ].map((item, i) => (
-            <div
+            <motion.div
               className={`visual-step ${i === 1 ? "current" : ""}`}
               key={item[0]}
+              variants={reveal}
+              initial="hidden"
+              animate="visible"
+              transition={{ delay: 0.45 + i * 0.1 }}
             >
               <span className="step-num">{item[0]}</span>
               <div>
@@ -340,7 +401,7 @@ function Home({
                 <small>{item[2]}</small>
               </div>
               <ArrowRight size={17} />
-            </div>
+            </motion.div>
           ))}
           <div className="visual-foot">
             <span>Ready when you are</span>
@@ -387,7 +448,22 @@ function Home({
           ].map(([Icon, title, copy], i) => (
             <motion.button
               className="feature-card"
+              id={
+                i === 0
+                  ? "tour-eligibility"
+                  : i === 1
+                    ? "tour-deadlines"
+                    : i === 2
+                      ? "tour-checklist"
+                      : i === 3
+                        ? "tour-faq"
+                        : "tour-journey"
+              }
               key={title as string}
+              variants={reveal}
+              whileInView="visible"
+              initial="hidden"
+              viewport={{ once: true, amount: 0.25 }}
               onClick={() =>
                 go(
                   (i === 0
@@ -464,32 +540,32 @@ function Programme({ go }: { go: (v: View) => void }) {
           <div className="quote-block">
             <Sparkles size={22} />
             <h2>What is IES?</h2>
-            <p>
-              Replace this section with the official IES programme description.
-              This prototype creates a calm, structured place for applicants to
-              understand the opportunity before they commit time to an
-              application.
-            </p>
+            <p>{programme.description} Designed for motivated and socially engaged students, IES combines academic study with practical experience, community participation, and cultural discovery in Berlin.</p>
           </div>
-          {[
-            [
-              "Why participate?",
-              "Use this space for the official benefits, learning outcomes or experience applicants can expect.",
-            ],
-            [
-              "Who is it for?",
-              "Add the official audience and eligibility summary here, with a link to the full requirements.",
-            ],
-            [
-              "What can applicants expect?",
-              "Describe the programme rhythm, key stages and support available in concise, human language.",
-            ],
-          ].map(([title, copy]) => (
+          {programmeComponents.map(({ title, description }) => (
             <div className="text-row" key={title}>
               <h3>{title}</h3>
-              <p>{copy}</p>
+              <p>{description}</p>
             </div>
           ))}
+          <div className="text-row">
+            <h3>Partner universities</h3>
+            <p>{programme.universities.join(" · ")}</p>
+          </div>
+          <div className="text-row">
+            <h3>Campus life & funding</h3>
+            <p>{scholarshipCoverage.join(" ")}</p>
+          </div>
+          <div className="text-row">
+            <h3>Programme history</h3>
+            <p>{programme.history}</p>
+          </div>
+          <div className="amounts-row">
+            <span className="eyebrow">FULL SCHOLARSHIP GUIDE · APPROX. €11,405 FOR SIX MONTHS</span>
+            <div className="amounts-grid">
+              {scholarshipAmounts.map(([label, amount]) => <span key={label}><b>{amount}</b>{label}</span>)}
+            </div>
+          </div>
         </div>
         <aside className="side-panel">
           <span className="eyebrow">THE SHORT VERSION</span>
@@ -533,11 +609,15 @@ function Eligibility({
   go: (v: View) => void;
 }) {
   const current = eligibilityCriteria[step];
-  const result = Object.values(answers).filter(
-    (value) => value === "yes" || value === "undergraduate",
+  const result = Object.entries(answers).filter(([id, value]) =>
+    (id === "location" && value.startsWith("yes")) ||
+    (id === "study" && ["bachelor", "master", "doctorate"].includes(value)) ||
+    (id === "age" && value === "yes") ||
+    (id === "academic" && value.startsWith("yes")) ||
+    (id === "language" && value === "yes"),
   ).length;
   const uncertain = Object.values(answers).filter(
-    (value) => value === "unsure" || value === "I am still preparing",
+    (value) => value.includes("not-sure") || value === "no",
   ).length;
   if (done)
     return (
@@ -562,7 +642,7 @@ function Eligibility({
         <PageIntro
           eyebrow="QUICK, INFORMATIVE, PRIVATE"
           title="Let’s find your starting point."
-          description="Six thoughtful questions. One clearer next step. Your answers stay in this browser."
+          description="Five official requirement questions. One clearer next step. Your answers stay in this browser."
         />
         <div className="wizard-progress">
           <div className="progress-label">
@@ -681,11 +761,11 @@ function Result({
           </p>
           <div className="reason-list">
             {[
-              "Education requirement appears to be met",
+              "Core eligibility requirements reviewed",
               uncertain
                 ? "Some answers need confirmation"
                 : "Language requirement appears to be met",
-              "Document readiness can be improved",
+              "CV preparation can be reviewed in the checklist",
             ].map((reason, i) => (
               <div key={reason}>
                 <span
@@ -735,7 +815,7 @@ function Result({
           </div>
         </div>
       </div>
-      <div className="next-action">
+      <motion.div className="next-action" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={reveal}>
         <div>
           <span className="eyebrow">YOUR NEXT BEST ACTION</span>
           <h3>Prepare your academic documents</h3>
@@ -747,7 +827,7 @@ function Result({
         <Button small onClick={() => go("checklist")}>
           Open checklist <ArrowRight size={15} />
         </Button>
-      </div>
+      </motion.div>
       <div className="result-links">
         <button onClick={() => go("deadlines")}>
           View deadlines <ArrowRight size={15} />
@@ -787,9 +867,13 @@ function Journey({
       <div className="journey-page">
         <div className="journey-line">
           {journeySteps.map(([number, title, copy], i) => (
-            <div
+            <motion.div
               className={`timeline-item ${i === 1 ? "highlight" : ""}`}
               key={number}
+              variants={reveal}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.35 }}
             >
               <button
                 className={
@@ -814,7 +898,7 @@ function Journey({
                     ? "Start here"
                     : "Up next"}
               </span>
-            </div>
+            </motion.div>
           ))}
         </div>
         <div className="journey-cta">
@@ -832,10 +916,30 @@ function Journey({
   );
 }
 function Deadlines() {
-  const next = deadlines[1];
+  const [now, setNow] = useState(0);
+  useEffect(() => {
+    setNow(Date.now());
+    const interval = window.setInterval(() => setNow(Date.now()), 60000);
+    return () => window.clearInterval(interval);
+  }, []);
+  const next = deadlines.find((deadline) => new Date(deadline.date).getTime() > now);
+  const countdownTarget = next ?? deadlines[deadlines.length - 1];
+  const [reminderDate, setReminderDate] = useStored<string | null>("ies-deadline-reminder", null);
+  const [notificationState, setNotificationState] = useState<NotificationPermission | "unsupported">("unsupported");
+  useEffect(() => {
+    if ("Notification" in window) setNotificationState(Notification.permission);
+  }, []);
+  const setDeadlineReminder = async () => {
+    if (!next) return;
+    if ("Notification" in window && Notification.permission === "default") {
+      const permission = await Notification.requestPermission();
+      setNotificationState(permission);
+    }
+    setReminderDate(next.date);
+  };
   const days = Math.max(
     0,
-    Math.ceil((new Date(next.date).getTime() - Date.now()) / 86400000),
+    Math.ceil((new Date(countdownTarget.date).getTime() - now) / 86400000),
   );
   return (
     <>
@@ -852,9 +956,9 @@ function Deadlines() {
         </span>
       </div>
       <div className="deadline-grid">
-        {deadlines.map((item, i) => (
+        {deadlines.map((item) => (
           <div
-            className={`deadline-card ${i === 1 ? "featured" : ""}`}
+            className={`deadline-card ${item === next ? "featured" : ""}`}
             key={item.title}
           >
             <div className="deadline-top">
@@ -862,18 +966,27 @@ function Deadlines() {
                 <IconFor icon={item.icon} />
               </span>
               <span className="status-badge">
-                {i === 1 ? "Next up" : item.status}
+                {item === next ? "Next up" : item.status}
               </span>
             </div>
             <h3>{item.title}</h3>
             <strong>{item.label}</strong>
             <p>{item.description}</p>
-            {i === 1 && (
+            {item === next && (
               <div className="countdown">
-                <span>Application closes in</span>
+                <span>{next ? "Next programme stage in" : "Latest programme date"}</span>
                 <b>
                   {days} <small>days</small>
                 </b>
+                <button className="reminder-button" onClick={setDeadlineReminder}>
+                  <Bell size={14} />
+                  {reminderDate === next.date ? "Reminder saved" : "Set a browser reminder"}
+                </button>
+                {reminderDate === next.date && (
+                  <small className="reminder-note">
+                    Saved in this browser{notificationState === "granted" ? " · notifications enabled" : " · return here to review"}.
+                  </small>
+                )}
               </div>
             )}
           </div>
@@ -939,7 +1052,7 @@ function FAQ() {
       </div>
       <div className="faq-list">
         {filtered.map((item, i) => (
-          <div className="faq-item" key={item.question}>
+          <motion.div className="faq-item" key={item.question} layout variants={reveal} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.3 }}>
             <button
               className="faq-question"
               onClick={() => setOpen(open === i ? null : i)}
@@ -974,7 +1087,7 @@ function FAQ() {
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
+          </motion.div>
         ))}
       </div>
       {!filtered.length && (
@@ -1087,7 +1200,7 @@ function Checklist({
         })}
       </div>
       {percent === 100 ? (
-        <div className="complete-banner">
+        <motion.div className="complete-banner" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 180, damping: 18 }}>
           <Sparkles size={21} />
           <div>
             <b>You’re ready.</b>
@@ -1099,7 +1212,7 @@ function Checklist({
           <Button small onClick={() => go("deadlines")}>
             Review deadlines <ArrowRight size={15} />
           </Button>
-        </div>
+        </motion.div>
       ) : (
         <div className="checklist-tip">
           <Sparkles size={19} />
@@ -1142,6 +1255,7 @@ function Assistant({
       initial={{ opacity: 0, y: 20, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.96 }}
+      transition={{ type: "spring", stiffness: 260, damping: 22 }}
     >
       <div className="assistant-head">
         <span className="assistant-avatar">

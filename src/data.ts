@@ -23,7 +23,6 @@ export const eligibilityCriteria = [
   { id: "age", label: "Will you be 28 or younger when the scholarship starts?", hint: "The official requirement is not older than 28 at the start of the scholarship.", options: ["Yes", "No", "I am not sure"] },
   { id: "academic", label: "Are you comfortable applying in any field of study?", hint: "IES accepts students from all fields of study.", options: ["Yes, my field is eligible", "No", "I am not sure"] },
   { id: "language", label: "Do you have at least B1 German or B1 English skills?", hint: "A language certificate is not required with the application. Skills can be assessed during the interview.", options: ["Yes", "No", "I am not sure"] },
-  { id: "documents", label: "Can you prepare a complete chronological CV with a photo?", hint: "The CV should be in German or English and include your academic, work, and volunteering background.", options: ["Yes, I can prepare it", "No", "I am still preparing it"] },
 ];
 
 export const applicationDocuments = [
