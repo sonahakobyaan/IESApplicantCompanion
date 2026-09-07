@@ -1,6 +1,7 @@
 "use client";
 /* eslint-disable react-hooks/set-state-in-effect, react-hooks/purity */
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -60,12 +61,13 @@ function useStored<T>(key: string, initial: T) {
 function Logo() {
   return (
     <div className="brand">
-      <span className="brand-mark">
-        <Compass size={17} strokeWidth={2.5} />
-      </span>
-      <span>
-        IES <b>Companion</b>
-      </span>
+      <Image
+        src="/logo_horizontal.png"
+        alt="IES Applicant Companion"
+        width={2048}
+        height={520}
+        priority
+      />
     </div>
   );
 }

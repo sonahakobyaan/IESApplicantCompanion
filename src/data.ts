@@ -5,7 +5,7 @@ export const programme = {
   name: "International Excellence Scholarship",
   companionName: "IES Applicant Companion",
   organisation: "Copernicus Berlin",
-  officialUrl: "https://www.copernicusberlin.org/",
+  officialUrl: "https://copernicusberlin.org/en/home",
   description: "A flexible 3-, 6-, 9-, or 12-month programme combining academic study, professional development, community engagement, and cultural discovery in Berlin.",
   tagline: "Your simple guide from curiosity to application.",
   universities: ["Humboldt-Universitaet zu Berlin", "Freie Universitaet Berlin", "Berlin School of Economics and Law", "University of Potsdam"],
