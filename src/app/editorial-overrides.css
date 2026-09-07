@@ -1,0 +1,27 @@
+.app-shell{background:var(--paper)}
+.topbar{background:var(--paper);backdrop-filter:none}
+.button{border-radius:2px;box-shadow:none}.button:hover{box-shadow:none}
+.assistant-panel{box-shadow:none;border-radius:0}
+.nav.mobile-visible{box-shadow:none}
+.journey-visual{border:0;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);border-radius:0;background:transparent;box-shadow:none;padding:22px 0}
+.visual-step{border-bottom:1px solid var(--line)}
+.feature-card{border-radius:0;background:transparent;box-shadow:none}
+.feature-card:hover{box-shadow:none;background:var(--orange-pale)}
+.readiness-banner{background:transparent;border-radius:0}
+.disclaimer{border-radius:0;background:transparent;border-top:1px solid var(--line);padding-top:16px}
+.quote-block{border-radius:0;background:transparent;color:var(--ink);border-top:2px solid var(--orange)}
+.quote-block p{color:var(--muted)}
+.side-panel{border-radius:0;background:transparent;box-shadow:none}
+.question-card,.result-card,.readiness-card{border-radius:0;box-shadow:none}
+.option{border-radius:0}
+.result-card{background:transparent;color:var(--ink)}
+.result-card p{color:var(--muted)}
+.result-card .result-kicker{color:var(--orange)}
+.result-card .result-icon{border-color:var(--orange);color:var(--orange);background:transparent}
+.deadline-card{border-radius:0;background:transparent;box-shadow:none}
+.deadline-card.featured{background:var(--orange-pale);box-shadow:none}
+.now-card{border-radius:0}
+.faq-bottom,.complete-banner,.checklist-tip,.next-action,.journey-cta{border-radius:0;box-shadow:none}
+.checklist-summary,.checklist-group{border-radius:0;background:transparent;box-shadow:none}
+.footer{background:var(--paper)}
+@media (max-width:700px){.journey-visual{box-shadow:none}.readiness-banner{padding:24px 0}.question-card{padding-left:0;padding-right:0}}
