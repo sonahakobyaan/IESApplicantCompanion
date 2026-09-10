@@ -72,12 +72,7 @@ function Tour() {
   if (!current || !target) return null;
   const activeStep = step ?? 0;
   const isLast = activeStep === tourSteps.length - 1;
-  const estimatedCardHeight = 200;
-  const spaceBelow = window.innerHeight - target.bottom;
-  const fitsBelow = spaceBelow >= estimatedCardHeight + 18;
-  const cardTop = fitsBelow
-    ? target.bottom + 18
-    : Math.max(16, target.top - estimatedCardHeight - 18);
+  const cardTop = target.bottom + 18;
   const cardLeft = Math.min(Math.max(16, target.left), window.innerWidth - 356);
 
   return (
