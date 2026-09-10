@@ -94,7 +94,7 @@ function Tour() {
         />
         <motion.aside
           className="tour-card"
-          style={{ top: cardTop, left: cardLeft }}
+          style={{ bottom: '100px', left: cardLeft }}
           initial={{ opacity: 0, y: 12, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 8, scale: 0.98 }}
