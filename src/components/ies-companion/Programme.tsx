@@ -47,19 +47,6 @@ export function Programme({ go }: { go: (v: View) => void }) {
             <h3>Programme history</h3>
             <p>{programme.history}</p>
           </div>
-          <div className="amounts-row">
-            <span className="eyebrow">
-              FULL SCHOLARSHIP GUIDE · APPROX. €11,405 FOR SIX MONTHS
-            </span>
-            <div className="amounts-grid">
-              {scholarshipAmounts.map(([label, amount]) => (
-                <span key={label}>
-                  <b>{amount}</b>
-                  {label}
-                </span>
-              ))}
-            </div>
-          </div>
         </div>
         <aside className="side-panel">
           <span className="eyebrow">THE SHORT VERSION</span>
